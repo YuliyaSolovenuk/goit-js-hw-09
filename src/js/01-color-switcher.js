@@ -1,12 +1,9 @@
 
 const BtnStartEl = document.querySelector('[data-start]')
-console.log(BtnStartEl)
 
 const BtnStopEl = document.querySelector('[data-stop]')
-console.log(BtnStopEl)
 
 const bodyEl = document.body;
-console.log(bodyEl)
 
 let timerId = null;
 disabled = false;
@@ -23,11 +20,13 @@ function onChangeBgcolor(e) {
         
     }, 1000)
     BtnStartEl.disabled = true;
+    BtnStopEl.disabled = false;
 }
 
 function offChangeBgcolor(e) {
     clearInterval(timerId);
     BtnStartEl.disabled = false;
+    BtnStopEl.disabled = true;
 }
 
 
