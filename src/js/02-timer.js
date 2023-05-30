@@ -1,111 +1,95 @@
- import flatpickr from "flatpickr";
- import "flatpickr/dist/flatpickr.min.css";
- import Notiflix from 'notiflix';
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
+import Notiflix from 'notiflix';
 
-   const timerInputEl = document.querySelector('#datetime-picker')
-   
-   const buttonEl = document.querySelector('button')
+const timerInputEl = document.querySelector('#datetime-picker');
 
-    const dateElements = {
-        days: document.querySelector('.value[data-days]'),
-        hours: document.querySelector('.value[data-hours]'),
-        minutes: document.querySelector('.value[data-minutes]'),
-        seconds: document.querySelector('.value[data-seconds]')
+const buttonEl = document.querySelector('button');
+
+const dateElements = {
+  days: document.querySelector('.value[data-days]'),
+  hours: document.querySelector('.value[data-hours]'),
+  minutes: document.querySelector('.value[data-minutes]'),
+  seconds: document.querySelector('.value[data-seconds]'),
+};
+
+let timerId = null;
+buttonEl.disabled = true;
+
+const options = {
+  enableTime: true,
+  time_24hr: true,
+  defaultDate: new Date(),
+  minuteIncrement: 1,
+
+  onClose(selectedDates) {
+    const selectedDate = selectedDates[0].getTime();
+    const dateNow = Date.now();
+
+    if (selectedDate < dateNow) {
+      // alert("Please choose a date in the future")
+
+      Notiflix.Notify.failure('Please choose a date in the future');
+      return;
     }
-    
-    let timerId = null;
-    buttonEl.disabled = true;
 
-    const options = {
-        enableTime: true,
-        time_24hr: true,
-        defaultDate: new Date(),
-        minuteIncrement: 1,
+    buttonEl.disabled = false;
+  },
+};
 
-        onClose(selectedDates) {
+const fp = flatpickr(timerInputEl, options);
+console.log(fp);
 
-            const selectedDate = selectedDates[0].getTime()
-            const dateNow = Date.now()
-        
-            if(selectedDate < dateNow){
-            // alert("Please choose a date in the future")
+buttonEl.addEventListener('click', onClick);
 
-                Notiflix.Notify.failure("Please choose a date in the future");
-                return
-            }
+function onClick(e) {
+  countdownTimer.start();
+  buttonEl.disabled = true;
+  timerInputEl.disabled = true;
+}
 
-            buttonEl.disabled = false;   
-        }
-    };
-  
-  const fp = flatpickr(timerInputEl, options); 
-  console.log(fp);
-  
+const countdownTimer = {
+  start() {
+    let dateFromCalendar = new Date(timerInputEl.value).getTime();
 
-  buttonEl.addEventListener('click', onClick)
-   
+    timerId = setInterval(() => {
+      let currentDate = String(Date.now());
 
-  function onClick (e) {
+      let deltaTime = dateFromCalendar - currentDate;
+      const { days, hours, minutes, seconds } = convertMs(deltaTime);
 
-    countdownTimer.start()
-    buttonEl.disabled = true;
-    timerInputEl.disabled = true;
+      dateElements.days.textContent = addLeadingZero(days);
+      dateElements.hours.textContent = addLeadingZero(hours);
+      dateElements.minutes.textContent = addLeadingZero(minutes);
+      dateElements.seconds.textContent = addLeadingZero(seconds);
 
-  }
+      if (!days && !hours && !minutes && !seconds) {
+        clearInterval(timerId);
+        console.log('yes');
+      }
+    }, 1000);
+  },
+};
 
- const countdownTimer = {
-    start() {
-        
-        let dateFromCalendar = new Date(timerInputEl.value).getTime()
+function convertMs(ms) {
+  // Number of milliseconds per unit of time
+  const second = 1000;
+  const minute = second * 60;
+  const hour = minute * 60;
+  const day = hour * 24;
 
-        timerId = setInterval(() =>{
+  // Remaining days
+  const days = Math.floor(ms / day);
+  // Remaining hours
+  const hours = Math.floor((ms % day) / hour);
+  // Remaining minutes
+  const minutes = Math.floor(((ms % day) % hour) / minute);
+  // Remaining seconds
+  const seconds = Math.floor((((ms % day) % hour) % minute) / second);
 
-            let currentDate = String(Date.now())
+  return { days, hours, minutes, seconds };
+}
 
-            let deltaTime = dateFromCalendar - currentDate
-           const { days, hours, minutes, seconds } = convertMs(deltaTime)
-        
-            dateElements.days.textContent = addLeadingZero(days)
-            dateElements.hours.textContent = addLeadingZero(hours)
-            dateElements.minutes.textContent = addLeadingZero(minutes)
-            dateElements.seconds.textContent = addLeadingZero(seconds) 
-            
-            if(!days && !hours && !minutes && !seconds) {
-                clearInterval(timerId)
-                console.log('yes');
-            }
-
-        }, 1000)
-       
-    },
-
- }
-
- 
- function convertMs(ms) {
-    // Number of milliseconds per unit of time
-    const second = 1000;
-    const minute = second * 60;
-    const hour = minute * 60;
-    const day = hour * 24;
-  
-    // Remaining days
-    const days = Math.floor(ms / day);
-    // Remaining hours
-    const hours = Math.floor((ms % day) / hour);
-    // Remaining minutes
-    const minutes = Math.floor(((ms % day) % hour) / minute);
-    // Remaining seconds
-    const seconds = Math.floor((((ms % day) % hour) % minute) / second);
-  
-    return { days, hours, minutes, seconds };
-  }
-  
-      
-
-  function  addLeadingZero(value) {
-
-    return String(value).padStart(2, 0);
-
-  }
-  
+function addLeadingZero(value) {
+  return String(value).padStart(2, 0);
+}
