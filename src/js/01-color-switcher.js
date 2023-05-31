@@ -5,7 +5,7 @@ const BtnStopEl = document.querySelector('[data-stop]');
 const bodyEl = document.body;
 
 let timerId = null;
-disabled = false;
+let disabled = false;
 
 BtnStartEl.addEventListener('click', onChangeBgcolor);
 
